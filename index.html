@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR Attendance App</title>
+<style>
+/* ===== LOGIN STYLES ===== */
+#loginOverlay{
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;
+}
+
+.loginBox{
+  background:#fff; padding:24px; border-radius:12px; width:280px; text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+
+.loginBox h2{margin-bottom:12px;}
+.loginBox input{display:block; width:100%; margin-bottom:12px; padding:10px; border-radius:8px; border:1px solid #ccc;}
+.loginBox button{padding:10px 20px; border-radius:8px; background:#6366f1; color:#fff; border:none; cursor:pointer;}
+
+/* ===== ATTENDANCE APP STYLES ===== */
+:root{
+  --bg:#f6f7fb; --card:#fff; --accent:#111827;
+}
+
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+
+body{margin:0;background:var(--bg);color:#111;padding-bottom:80px}
+
+header{background:var(--card);padding:12px 16px;border-bottom:1px solid #e6e8ef;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:700}
+.meta{font-size:13px;color:#6b7280}
+
+main{max-width:980px;margin:18px auto;padding:12px}
+.card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 4px 14px rgba(16,24,40,0.04);margin-bottom:12px}
+.hidden{display:none !important; opacity:0; pointer-events:none;}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+.controls button{margin-left:6px}
+
+.layout{display:flex;gap:12px}
+aside.card{width:34%}
+section.card{flex:1}
+
+.weekday{margin-top:6px;color:#374151;font-weight:600}
+.studentList{max-height:48vh;overflow:auto;border-radius:8px;border:1px solid #eef2f7;padding:6px;margin-top:8px}
+.studentItem{display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;border-bottom:1px dashed #edf2f7}
+.studentItem:last-child{border-bottom:0}
+.present{background:#ecfdf5;border:1px solid #16e731;padding:6px;border-radius:6px}
+.absent{background:#fff1f2;border:1px solid #e21313;padding:6px;border-radius:6px}
+
+.actionRow{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.row{display:flex;gap:8px;align-items:center}
+
+input,select,button{padding:8px;border-radius:8px;border:1px solid #e6e6ef}
+button{background:#fff;border:1px solid #d1d5db}
+
+.drawer{position:fixed;right:0;top:0;height:100%;width:100%;background:rgba(0,0,0,0.35);display:flex;justify-content:flex-end;align-items:flex-start;transition:opacity 0.3s;}
+.drawerInner{width:420px;background:#fff;padding:16px;overflow:auto;transform:translateX(100%);transition:transform 0.3s ease;}
+.drawer:not(.hidden) .drawerInner{transform:translateX(0);}
+
+.gridForm{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+
+@media(max-width:800px){
+  .layout{flex-direction:column}
+  aside.card{width:100%}
+}
+
+footer{padding:20px;text-align:center;color:#6b7280}
+
+.period{padding:8px;border-radius:8px;border:1px solid #eef2ff;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.period.selected{box-shadow:0 0 0 2px rgba(99,102,241,0.12);border-color:#6366f1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+  <div class="loginBox">
+    <h2>CR Login</h2>
+    <input type="text" id="loginUsername" placeholder="Username">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button id="loginBtn">Login</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+<header>
+  <div class="brand">CR Attendance App</div>
+  <button id="logout">Logout</button>
+</header>
+
+<main class="layout">
+  <aside class="card">
+    <h4>Date & Periods</h4>
+    <input type="date" id="datePicker">
+    <div class="weekday" id="weekday"></div>
+    <div id="periodsList"></div>
+  </aside>
+
+  <section class="card">
+    <h4 id="attTitle"></h4>
+    <div id="periodInfo"></div>
+    <div id="studentMarkArea" class="hidden">
+      <div class="actionRow">
+        <button id="markAllPresent">Mark All Present</button>
+        <button id="markAllAbsent">Mark All Absent</button>
+        <button id="saveAttendance">Save Attendance</button>
+        <button id="reopenAttendance">Reopen Attendance</button>
+        <button id="exportCurrentCSV">Export All</button>
+        <button id="exportPresentCSV">Export Present</button>
+        <button id="exportAbsentCSV">Export Absent</button>
+      </div>
+      <div class="studentList" id="studentList"></div>
+    </div>
+  </section>
+</main>
+
+<!-- STUDENTS DRAWER -->
+<button id="openStudents" style="position:fixed; bottom:20px; right:20px;">Manage Students</button>
+<div id="studentsDrawer" class="drawer hidden">
+  <div class="drawerInner">
+    <button id="closeStudents">Close</button>
+    <h4>Add / Edit Student</h4>
+    <div class="gridForm">
+      <input type="text" id="s_name" placeholder="Name">
+      <input type="text" id="s_roll" placeholder="Roll">
+      <input type="text" id="s_father" placeholder="Father's Name">
+      <input type="text" id="s_mobile" placeholder="Mobile">
+      <select id="s_set">
+        <option value="A">Set A</option>
+        <option value="B">Set B</option>
+      </select>
+    </div>
+    <button id="addStudentBtn">Add Student</button>
+    <h4>Students List</h4>
+    <button id="sortRollBtn">Sort by Roll</button>
+    <input type="file" id="importStudentsFile" style="margin-top:8px;">
+    <button id="importStudentsBtn">Import Backup</button>
+    <div id="studentsTableWrapper"></div>
+  </div>
+</div>
+
+<script>
+// =================== CR LOGIN ===================
+const CR_CREDENTIALS = { username: "mohit CR", password: "8161" };
+const loginOverlay = document.getElementById('loginOverlay');
+const loginBtn = document.getElementById('loginBtn');
+const loginUsername = document.getElementById('loginUsername');
+const loginPassword = document.getElementById('loginPassword');
+const appDiv = document.getElementById('app');
+const logoutBtn = document.getElementById('logout');
+
+loginBtn.addEventListener('click', () => {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value.trim();
+    if (username === CR_CREDENTIALS.username && password === CR_CREDENTIALS.password) {
+        loginOverlay.classList.add('hidden');
+        appDiv.classList.remove('hidden');
+        initializeApp();
+    } else { alert("Invalid username or password!"); }
+});
+loginPassword.addEventListener('keypress', e => { if(e.key==="Enter") loginBtn.click(); });
+logoutBtn.addEventListener('click', () => { 
+    appDiv.classList.add('hidden'); 
+    loginOverlay.classList.remove('hidden'); 
+    loginUsername.value=''; 
+    loginPassword.value=''; 
+});
+
+// =================== TIMETABLE ===================
+const DEFAULT_TIMETABLE = {
+    Monday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:2,start:"10:30 AM",end:"11:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:3,start:"11:30 AM",end:"12:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"}],
+    Tuesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Techniques",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"TOC",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+    Wednesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Apptitude and Skills",faculty:"Rachit Rastogi"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+    Thursday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Programming Skills",faculty:"Amarjeet Rawat"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"}],
+    Friday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+    Saturday:[], Sunday:[]
+};
+
+// =================== ELEMENTS ===================
+const datePicker = document.getElementById('datePicker');
+const weekdayDiv = document.getElementById('weekday');
+const periodsList = document.getElementById('periodsList');
+const attTitle = document.getElementById('attTitle');
+const periodInfo = document.getElementById('periodInfo');
+const studentMarkArea = document.getElementById('studentMarkArea');
+const studentListDiv = document.getElementById('studentList');
+const markAllPresentBtn = document.getElementById('markAllPresent');
+const markAllAbsentBtn = document.getElementById('markAllAbsent');
+const saveAttendanceBtn = document.getElementById('saveAttendance');
+const reopenAttendanceBtn = document.getElementById('reopenAttendance');
+const exportAllBtn = document.getElementById('exportCurrentCSV');
+const exportPresentBtn = document.getElementById('exportPresentCSV');
+const exportAbsentBtn = document.getElementById('exportAbsentCSV');
+
+let students = JSON.parse(localStorage.getItem('students') || '[]');
+let attendance = {};
+let currentPeriodKey = null;
+
+// =================== INITIALIZATION ===================
+function initializeApp() {
+    // Render students drawer, date picker, periods
+    datePicker.addEventListener('change',()=>{
+        const date=new Date(datePicker.value);
+        const dayName=date.toLocaleDateString('en-US',{weekday:'long'});
+        weekdayDiv.textContent=dayName;
+        renderPeriods(dayName);
+    });
+
+    const today=new Date().toISOString().split('T')[0];
+    datePicker.value=today;
+    datePicker.dispatchEvent(new Event('change'));
+}
+
+// =================== RENDER PERIODS ===================
+function renderPeriods(dayName){
+    periodsList.innerHTML='';
+    const periods=DEFAULT_TIMETABLE[dayName]||[];
+    if(periods.length===0){ periodsList.innerHTML="<p>No classes today.</p>"; return; }
+    periods.forEach((p,index)=>{
+        const div=document.createElement('div');
+        div.className='period';
+        div.textContent=`Period ${p.period}: ${p.type==='lab'||p.type==='project'?p.sets.A.subject:p.subject}`;
+        div.onclick=()=>selectPeriod(dayName,index);
+        periodsList.appendChild(div);
+    });
+}
+
+// =================== PERIOD SELECTION ===================
+function selectPeriod(day,index){
+    const periods=DEFAULT_TIMETABLE[day]||[];
+    const p=periods[index];
+    currentPeriodKey=`${day}_${p.period}`;
+    document.querySelectorAll('.period').forEach(el=>el.classList.remove('selected'));
+    document.querySelectorAll('.period')[index].classList.add('selected');
+    attTitle.textContent=`Period ${p.period} Attendance`;
+    studentMarkArea.classList.remove('hidden');
+
+    if(p.type==='lab'||p.type==='project'){
+        periodInfo.innerHTML=`${p.sets.A.subject} / ${p.sets.B.subject}<br>
+        <button id="chooseSetA">Set A</button>
+        <button id="chooseSetB">Set B</button>`;
+        studentListDiv.innerHTML='';
+        document.getElementById('chooseSetA').onclick=()=>renderStudentListForSet(p,'A');
+        document.getElementById('chooseSetB').onclick=()=>renderStudentListForSet(p,'B');
+    } else {
+        periodInfo.textContent=`${p.subject} (${p.faculty})`;
+        attendance[currentPeriodKey]=JSON.parse(localStorage.getItem(currentPeriodKey)||'{}');
+        renderStudentList();
+    }
+}
+
+// =================== STUDENT LIST RENDERING ===================
+function renderStudentListForSet(periodObj,set){
+    studentListDiv.innerHTML='';
+    const filteredStudents=students.filter(s=>s.set===set);
+    attendance[currentPeriodKey]=JSON.parse(localStorage.getItem(currentPeriodKey)||'{}');
+
+    filteredStudents.forEach(s=>{
+        const status=attendance[currentPeriodKey][s.roll]||'';
+        const div=document.createElement('div');
+        div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
+        div.innerHTML=`<span>${s.roll} - ${s.name}</span>
+        <select data-roll="${s.roll}">
+          <option value="">--</option>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+        </select>`;
+        div.querySelector('select').value=status;
+        div.querySelector('select').addEventListener('change',e=>{
+            attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
+            localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
+            renderStudentListForSet(periodObj,set);
+        });
+        studentListDiv.appendChild(div);
+    });
+}
+
+function renderStudentList(){
+    studentListDiv.innerHTML='';
+    students.forEach(s=>{
+        const status=attendance[currentPeriodKey][s.roll]||'';
+        const div=document.createElement('div');
+        div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
+        div.innerHTML=`<span>${s.roll} - ${s.name}</span>
+        <select data-roll="${s.roll}">
+          <option value="">--</option>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+        </select>`;
+        div.querySelector('select').value=status;
+        div.querySelector('select').addEventListener('change',e=>{
+            attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
+            localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
+            renderStudentList();
+        });
+        studentListDiv.appendChild(div);
+    });
+}
+</script>
+</body>
+</html>
