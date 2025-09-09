@@ -10,65 +10,45 @@
   position:fixed; top:0; left:0; width:100%; height:100%;
   background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;
 }
-
 .loginBox{
   background:#fff; padding:24px; border-radius:12px; width:280px; text-align:center;
   box-shadow:0 4px 20px rgba(0,0,0,0.2);
 }
-
 .loginBox h2{margin-bottom:12px;}
 .loginBox input{display:block; width:100%; margin-bottom:12px; padding:10px; border-radius:8px; border:1px solid #ccc;}
 .loginBox button{padding:10px 20px; border-radius:8px; background:#6366f1; color:#fff; border:none; cursor:pointer;}
 
 /* ===== ATTENDANCE APP STYLES ===== */
-:root{
-  --bg:#f6f7fb; --card:#fff; --accent:#111827;
-}
-
+:root{--bg:#f6f7fb; --card:#fff; --accent:#111827;}
 *{box-sizing:border-box;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
-
 body{margin:0;background:var(--bg);color:#111;padding-bottom:80px}
-
 header{background:var(--card);padding:12px 16px;border-bottom:1px solid #e6e8ef;display:flex;justify-content:space-between;align-items:center}
 .brand{font-weight:700}
 .meta{font-size:13px;color:#6b7280}
-
 main{max-width:980px;margin:18px auto;padding:12px}
 .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 4px 14px rgba(16,24,40,0.04);margin-bottom:12px}
 .hidden{display:none !important; opacity:0; pointer-events:none;}
 .top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
 .controls button{margin-left:6px}
-
 .layout{display:flex;gap:12px}
 aside.card{width:34%}
 section.card{flex:1}
-
 .weekday{margin-top:6px;color:#374151;font-weight:600}
 .studentList{max-height:48vh;overflow:auto;border-radius:8px;border:1px solid #eef2f7;padding:6px;margin-top:8px}
 .studentItem{display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;border-bottom:1px dashed #edf2f7}
 .studentItem:last-child{border-bottom:0}
 .present{background:#ecfdf5;border:1px solid #16e731;padding:6px;border-radius:6px}
 .absent{background:#fff1f2;border:1px solid #e21313;padding:6px;border-radius:6px}
-
 .actionRow{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
 .row{display:flex;gap:8px;align-items:center}
-
 input,select,button{padding:8px;border-radius:8px;border:1px solid #e6e6ef}
-button{background:#fff;border:1px solid #d1d5db}
-
+button{background:#fff;border:1px solid #d1d5db;cursor:pointer}
 .drawer{position:fixed;right:0;top:0;height:100%;width:100%;background:rgba(0,0,0,0.35);display:flex;justify-content:flex-end;align-items:flex-start;transition:opacity 0.3s;}
 .drawerInner{width:420px;background:#fff;padding:16px;overflow:auto;transform:translateX(100%);transition:transform 0.3s ease;}
 .drawer:not(.hidden) .drawerInner{transform:translateX(0);}
-
 .gridForm{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-
-@media(max-width:800px){
-  .layout{flex-direction:column}
-  aside.card{width:100%}
-}
-
+@media(max-width:800px){.layout{flex-direction:column} aside.card{width:100%}}
 footer{padding:20px;text-align:center;color:#6b7280}
-
 .period{padding:8px;border-radius:8px;border:1px solid #eef2ff;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .period.selected{box-shadow:0 0 0 2px rgba(99,102,241,0.12);border-color:#6366f1}
 </style>
@@ -112,6 +92,7 @@ footer{padding:20px;text-align:center;color:#6b7280}
         <button id="exportCurrentCSV">Export All</button>
         <button id="exportPresentCSV">Export Present</button>
         <button id="exportAbsentCSV">Export Absent</button>
+        <button id="sortRollBtn">Sort by Roll</button>
       </div>
       <div class="studentList" id="studentList"></div>
     </div>
@@ -136,101 +117,82 @@ footer{padding:20px;text-align:center;color:#6b7280}
     </div>
     <button id="addStudentBtn">Add Student</button>
     <h4>Students List</h4>
-    <button id="sortRollBtn">Sort by Roll</button>
-    <input type="file" id="importStudentsFile" style="margin-top:8px;">
-    <button id="importStudentsBtn">Import Backup</button>
     <div id="studentsTableWrapper"></div>
   </div>
 </div>
 
 <script>
-// =================== CR LOGIN ===================
-const CR_CREDENTIALS = { username: "mohit CR", password: "8161" };
-const loginOverlay = document.getElementById('loginOverlay');
-const loginBtn = document.getElementById('loginBtn');
-const loginUsername = document.getElementById('loginUsername');
-const loginPassword = document.getElementById('loginPassword');
-const appDiv = document.getElementById('app');
-const logoutBtn = document.getElementById('logout');
+// ===== LOGIN =====
+const CR_CREDENTIALS={username:"mohit CR",password:"8161"};
+const loginOverlay=document.getElementById('loginOverlay');
+const loginBtn=document.getElementById('loginBtn');
+const loginUsername=document.getElementById('loginUsername');
+const loginPassword=document.getElementById('loginPassword');
+const appDiv=document.getElementById('app');
+const logoutBtn=document.getElementById('logout');
 
-loginBtn.addEventListener('click', () => {
-    const username = loginUsername.value.trim();
-    const password = loginPassword.value.trim();
-    if (username === CR_CREDENTIALS.username && password === CR_CREDENTIALS.password) {
-        loginOverlay.classList.add('hidden');
-        appDiv.classList.remove('hidden');
-        initializeApp();
-    } else { alert("Invalid username or password!"); }
+loginBtn.addEventListener('click',()=>{
+  const username=loginUsername.value.trim();
+  const password=loginPassword.value.trim();
+  if(username===CR_CREDENTIALS.username && password===CR_CREDENTIALS.password){
+    loginOverlay.classList.add('hidden');
+    appDiv.classList.remove('hidden');
+    initializeApp();
+  }else alert("Invalid username or password!");
 });
-loginPassword.addEventListener('keypress', e => { if(e.key==="Enter") loginBtn.click(); });
-logoutBtn.addEventListener('click', () => { 
-    appDiv.classList.add('hidden'); 
-    loginOverlay.classList.remove('hidden'); 
-    loginUsername.value=''; 
-    loginPassword.value=''; 
-});
+loginPassword.addEventListener('keypress',e=>{if(e.key==="Enter") loginBtn.click();});
+logoutBtn.addEventListener('click',()=>{ appDiv.classList.add('hidden'); loginOverlay.classList.remove('hidden'); loginUsername.value=''; loginPassword.value='';});
 
-// =================== TIMETABLE ===================
-const DEFAULT_TIMETABLE = {
-    Monday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:2,start:"10:30 AM",end:"11:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:3,start:"11:30 AM",end:"12:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"}],
-    Tuesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Techniques",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"TOC",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
-    Wednesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Apptitude and Skills",faculty:"Rachit Rastogi"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
-    Thursday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Programming Skills",faculty:"Amarjeet Rawat"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"}],
-    Friday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
-    Saturday:[], Sunday:[]
+// ===== TIMETABLE =====
+const DEFAULT_TIMETABLE={
+  Monday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:2,start:"10:30 AM",end:"11:30 AM",type:"lab",sets:{A:{subject:"DBMS Lab",faculty:"Deepak Pathak"},B:{subject:"Python Lab",faculty:"Manish Negi"}}},{period:3,start:"11:30 AM",end:"12:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"lab",sets:{A:{subject:"Python Lab",faculty:"Manish Negi"},B:{subject:"DBMS Lab",faculty:"Deepak Pathak"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"}],
+  Tuesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Techniques",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"TOC",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+  Wednesday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Apptitude and Skills",faculty:"Rachit Rastogi"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+  Thursday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Programming Skills",faculty:"Amarjeet Rawat"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"}],
+  Friday:[{period:1,start:"09:30 AM",end:"10:30 AM",type:"theory",subject:"Theory of Computation",faculty:"Nityadeep Sharma"},{period:2,start:"10:30 AM",end:"11:30 AM",type:"theory",subject:"Computer Based Optimization Technique",faculty:"Harshit Gupta"},{period:3,start:"11:30 AM",end:"12:30 PM",type:"project",sets:{A:{subject:"Mini Project-III",faculty:"Abhinav Kumar"},B:{subject:"Mini Project-III",faculty:"Manish Negi"}}},{period:4,start:"01:30 PM",end:"02:30 PM",type:"theory",subject:"Programming using Python",faculty:"Manish Negi"},{period:5,start:"02:30 PM",end:"03:30 PM",type:"theory",subject:"DBMS",faculty:"Deepak Pathak"}],
+  Saturday:[], Sunday:[]
 };
 
-// =================== ELEMENTS ===================
-const datePicker = document.getElementById('datePicker');
-const weekdayDiv = document.getElementById('weekday');
-const periodsList = document.getElementById('periodsList');
-const attTitle = document.getElementById('attTitle');
-const periodInfo = document.getElementById('periodInfo');
-const studentMarkArea = document.getElementById('studentMarkArea');
-const studentListDiv = document.getElementById('studentList');
-const markAllPresentBtn = document.getElementById('markAllPresent');
-const markAllAbsentBtn = document.getElementById('markAllAbsent');
-const saveAttendanceBtn = document.getElementById('saveAttendance');
-const reopenAttendanceBtn = document.getElementById('reopenAttendance');
-const exportAllBtn = document.getElementById('exportCurrentCSV');
-const exportPresentBtn = document.getElementById('exportPresentCSV');
-const exportAbsentBtn = document.getElementById('exportAbsentCSV');
+let students=JSON.parse(localStorage.getItem('students')||'[]');
+let attendance={};
+let currentPeriodKey=null;
 
-let students = JSON.parse(localStorage.getItem('students') || '[]');
-let attendance = {};
-let currentPeriodKey = null;
+// ===== INITIALIZE APP =====
+function initializeApp(){
+  const datePicker=document.getElementById('datePicker');
+  const weekdayDiv=document.getElementById('weekday');
+  const periodsList=document.getElementById('periodsList');
+  const attTitle=document.getElementById('attTitle');
+  const periodInfo=document.getElementById('periodInfo');
+  const studentMarkArea=document.getElementById('studentMarkArea');
+  const studentListDiv=document.getElementById('studentList');
 
-// =================== INITIALIZATION ===================
-function initializeApp() {
-    // Render students drawer, date picker, periods
-    datePicker.addEventListener('change',()=>{
-        const date=new Date(datePicker.value);
-        const dayName=date.toLocaleDateString('en-US',{weekday:'long'});
-        weekdayDiv.textContent=dayName;
-        renderPeriods(dayName);
-    });
+  const markAllPresentBtn=document.getElementById('markAllPresent');
+  const markAllAbsentBtn=document.getElementById('markAllAbsent');
+  const saveAttendanceBtn=document.getElementById('saveAttendance');
+  const reopenAttendanceBtn=document.getElementById('reopenAttendance');
+  const exportAllBtn=document.getElementById('exportCurrentCSV');
+  const exportPresentBtn=document.getElementById('exportPresentCSV');
+  const exportAbsentBtn=document.getElementById('exportAbsentCSV');
+  const sortRollBtn=document.getElementById('sortRollBtn');
 
-    const today=new Date().toISOString().split('T')[0];
-    datePicker.value=today;
-    datePicker.dispatchEvent(new Event('change'));
-}
-
-// =================== RENDER PERIODS ===================
-function renderPeriods(dayName){
+  // ===== RENDER PERIODS =====
+  function renderPeriods(dayName){
     periodsList.innerHTML='';
     const periods=DEFAULT_TIMETABLE[dayName]||[];
     if(periods.length===0){ periodsList.innerHTML="<p>No classes today.</p>"; return; }
     periods.forEach((p,index)=>{
-        const div=document.createElement('div');
-        div.className='period';
-        div.textContent=`Period ${p.period}: ${p.type==='lab'||p.type==='project'?p.sets.A.subject:p.subject}`;
-        div.onclick=()=>selectPeriod(dayName,index);
-        periodsList.appendChild(div);
+      const div=document.createElement('div');
+      div.className='period';
+      let subjectText=p.type==='lab'||p.type==='project'?p.sets.A.subject:p.subject;
+      div.textContent=`Period ${p.period}: ${subjectText}`;
+      div.onclick=()=>selectPeriod(dayName,index);
+      periodsList.appendChild(div);
     });
-}
+  }
 
-// =================== PERIOD SELECTION ===================
-function selectPeriod(day,index){
+  // ===== SELECT PERIOD =====
+  function selectPeriod(day,index){
     const periods=DEFAULT_TIMETABLE[day]||[];
     const p=periods[index];
     currentPeriodKey=`${day}_${p.period}`;
@@ -240,66 +202,137 @@ function selectPeriod(day,index){
     studentMarkArea.classList.remove('hidden');
 
     if(p.type==='lab'||p.type==='project'){
-        periodInfo.innerHTML=`${p.sets.A.subject} / ${p.sets.B.subject}<br>
-        <button id="chooseSetA">Set A</button>
-        <button id="chooseSetB">Set B</button>`;
-        studentListDiv.innerHTML='';
-        document.getElementById('chooseSetA').onclick=()=>renderStudentListForSet(p,'A');
-        document.getElementById('chooseSetB').onclick=()=>renderStudentListForSet(p,'B');
-    } else {
-        periodInfo.textContent=`${p.subject} (${p.faculty})`;
-        attendance[currentPeriodKey]=JSON.parse(localStorage.getItem(currentPeriodKey)||'{}');
-        renderStudentList();
+      periodInfo.innerHTML=`${p.sets.A.subject} / ${p.sets.B.subject}<br>
+      <button id="chooseSetA">Set A</button>
+      <button id="chooseSetB">Set B</button>`;
+      studentListDiv.innerHTML='';
+      document.getElementById('chooseSetA').onclick=()=>renderStudentListForSet(p,'A');
+      document.getElementById('chooseSetB').onclick=()=>renderStudentListForSet(p,'B');
+    }else{
+      periodInfo.textContent=`${p.subject} (${p.faculty})`;
+      attendance[currentPeriodKey]=JSON.parse(localStorage.getItem(currentPeriodKey)||'{}');
+      renderStudentList();
     }
-}
+  }
 
-// =================== STUDENT LIST RENDERING ===================
-function renderStudentListForSet(periodObj,set){
+  // ===== RENDER STUDENTS =====
+  function renderStudentList(){
     studentListDiv.innerHTML='';
-    const filteredStudents=students.filter(s=>s.set===set);
+    const sortedStudents=[...students].sort((a,b)=>Number(a.roll)-Number(b.roll));
+    sortedStudents.forEach(s=>{
+      const status=attendance[currentPeriodKey][s.roll]||'';
+      const div=document.createElement('div');
+      div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
+      div.innerHTML=`<span>${s.roll} - ${s.name}</span>
+      <select data-roll="${s.roll}">
+        <option value="">--</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+      </select>`;
+      div.querySelector('select').value=status;
+      div.querySelector('select').addEventListener('change',e=>{
+        attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
+        localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
+        renderStudentList();
+      });
+      studentListDiv.appendChild(div);
+    });
+  }
+
+  // ===== RENDER STUDENTS FOR SET =====
+  function renderStudentListForSet(periodObj,set){
+    studentListDiv.innerHTML='';
+    const filteredStudents=students.filter(s=>s.set===set).sort((a,b)=>Number(a.roll)-Number(b.roll));
     attendance[currentPeriodKey]=JSON.parse(localStorage.getItem(currentPeriodKey)||'{}');
-
     filteredStudents.forEach(s=>{
-        const status=attendance[currentPeriodKey][s.roll]||'';
-        const div=document.createElement('div');
-        div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
-        div.innerHTML=`<span>${s.roll} - ${s.name}</span>
-        <select data-roll="${s.roll}">
-          <option value="">--</option>
-          <option value="present">Present</option>
-          <option value="absent">Absent</option>
-        </select>`;
-        div.querySelector('select').value=status;
-        div.querySelector('select').addEventListener('change',e=>{
-            attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
-            localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
-            renderStudentListForSet(periodObj,set);
-        });
-        studentListDiv.appendChild(div);
+      const status=attendance[currentPeriodKey][s.roll]||'';
+      const div=document.createElement('div');
+      div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
+      div.innerHTML=`<span>${s.roll} - ${s.name}</span>
+      <select data-roll="${s.roll}">
+        <option value="">--</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+      </select>`;
+      div.querySelector('select').value=status;
+      div.querySelector('select').addEventListener('change',e=>{
+        attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
+        localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
+        renderStudentListForSet(periodObj,set);
+      });
+      studentListDiv.appendChild(div);
     });
-}
+  }
 
-function renderStudentList(){
-    studentListDiv.innerHTML='';
-    students.forEach(s=>{
-        const status=attendance[currentPeriodKey][s.roll]||'';
-        const div=document.createElement('div');
-        div.className='studentItem '+(status==='present'?'present':status==='absent'?'absent':'');
-        div.innerHTML=`<span>${s.roll} - ${s.name}</span>
-        <select data-roll="${s.roll}">
-          <option value="">--</option>
-          <option value="present">Present</option>
-          <option value="absent">Absent</option>
-        </select>`;
-        div.querySelector('select').value=status;
-        div.querySelector('select').addEventListener('change',e=>{
-            attendance[currentPeriodKey][e.target.dataset.roll]=e.target.value;
-            localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey]));
-            renderStudentList();
-        });
-        studentListDiv.appendChild(div);
+  // ===== MARK ALL / SAVE =====
+  markAllPresentBtn.onclick=()=>{students.forEach(s=>attendance[currentPeriodKey][s.roll]='present'); localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey])); renderStudentList();}
+  markAllAbsentBtn.onclick=()=>{students.forEach(s=>attendance[currentPeriodKey][s.roll]='absent'); localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey])); renderStudentList();}
+  saveAttendanceBtn.onclick=()=>{localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey])); alert("Saved!");}
+  reopenAttendanceBtn.onclick=()=>{attendance[currentPeriodKey]={}; localStorage.setItem(currentPeriodKey,JSON.stringify(attendance[currentPeriodKey])); renderStudentList();}
+
+  // ===== EXPORT CSV =====
+  function downloadCSV(data,filename){ const csvRows=[]; const headers=Object.keys(data[0]||{}); csvRows.push(headers.join(',')); data.forEach(row=>{csvRows.push(headers.map(h=>row[h]).join(','));}); const blob=new Blob([csvRows.join('\n')],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);}
+  exportAllBtn.onclick=()=>{ const data=students.map(s=>({roll:s.roll,name:s.name,status:attendance[currentPeriodKey][s.roll]||''})); downloadCSV(data,'attendance_all.csv'); }
+  exportPresentBtn.onclick=()=>{ const data=students.filter(s=>attendance[currentPeriodKey][s.roll]==='present').map(s=>({roll:s.roll,name:s.name,status:'present'})); downloadCSV(data,'attendance_present.csv'); }
+  exportAbsentBtn.onclick=()=>{ const data=students.filter(s=>attendance[currentPeriodKey][s.roll]==='absent').map(s=>({roll:s.roll,name:s.name,status:'absent'})); downloadCSV(data,'attendance_absent.csv'); }
+
+  // ===== SORT BUTTON =====
+  sortRollBtn.onclick=()=>{
+    if(currentPeriodKey){
+      if(document.getElementById('chooseSetA') && !document.getElementById('chooseSetA').disabled){
+        const set=document.querySelector('#studentMarkArea select')?.value||'A';
+        renderStudentListForSet({sets:{}},set);
+      } else renderStudentList();
+    }
+  }
+
+  // ===== DATE PICKER =====
+  datePicker.value=new Date().toISOString().split('T')[0];
+  weekdayDiv.textContent=new Date(datePicker.value).toLocaleDateString('en-US',{weekday:'long'});
+  renderPeriods(new Date(datePicker.value).toLocaleDateString('en-US',{weekday:'long'}));
+  datePicker.addEventListener('change',()=>{
+    const dayName=new Date(datePicker.value).toLocaleDateString('en-US',{weekday:'long'});
+    weekdayDiv.textContent=dayName;
+    renderPeriods(dayName);
+    studentMarkArea.classList.add('hidden');
+  });
+
+  // ===== STUDENTS DRAWER =====
+  const openStudents=document.getElementById('openStudents');
+  const closeStudents=document.getElementById('closeStudents');
+  const studentsDrawer=document.getElementById('studentsDrawer');
+  const addStudentBtn=document.getElementById('addStudentBtn');
+  const studentsTableWrapper=document.getElementById('studentsTableWrapper');
+
+  openStudents.onclick=()=>studentsDrawer.classList.remove('hidden');
+  closeStudents.onclick=()=>studentsDrawer.classList.add('hidden');
+
+  function renderStudentsTable(){
+    studentsTableWrapper.innerHTML='';
+    students.forEach((s,index)=>{
+      const div=document.createElement('div');
+      div.style.display='flex'; div.style.justifyContent='space-between'; div.style.padding='4px 0';
+      div.innerHTML=`${s.roll} - ${s.name} (${s.set}) <button data-index="${index}">Delete</button>`;
+      div.querySelector('button').onclick=()=>{students.splice(index,1); localStorage.setItem('students',JSON.stringify(students)); renderStudentsTable();}
+      studentsTableWrapper.appendChild(div);
     });
+  }
+
+  addStudentBtn.onclick=()=>{
+    const name=document.getElementById('s_name').value.trim();
+    const roll=document.getElementById('s_roll').value.trim();
+    const father=document.getElementById('s_father').value.trim();
+    const mobile=document.getElementById('s_mobile').value.trim();
+    const set=document.getElementById('s_set').value;
+    if(!name || !roll){ alert("Enter Name & Roll"); return; }
+    students.push({name,roll,father,mobile,set});
+    localStorage.setItem('students',JSON.stringify(students));
+    renderStudentsTable();
+  }
+
+  renderStudentsTable();
 }
 </script>
+<footer>CR Attendance App © 2025</footer>
 </body>
 </html>
