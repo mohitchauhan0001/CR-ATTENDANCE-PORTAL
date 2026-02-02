@@ -146,248 +146,45 @@ logoutBtn.addEventListener('click',()=>{ appDiv.classList.add('hidden'); loginOv
 // ===== CORRECTED TIMETABLE =====
 const DEFAULT_TIMETABLE = {
   Monday: [
-    {
-      period: 1,
-      start: "09:30 AM",
-      end: "10:30 AM",
-      type: "lab",
-      sets: {
-        A: { subject: "Linux Lab (BCA-C261)", faculty: "Neha Bhatt" },
-        B: { subject: "Programming in JAVA Lab (BCA-C262)", faculty: "Anup Shekhar Chamoli" }
-      }
-    },
-    {
-      period: 2,
-      start: "10:30 AM",
-      end: "11:30 AM",
-      type: "lab",
-      sets: {
-        A: { subject: "Linux Lab (BCA-C261)", faculty: "Neha Bhatt" },
-        B: { subject: "Programming in JAVA Lab (BCA-C262)", faculty: "Anup Shekhar Chamoli" }
-      }
-    },
-    {
-      period: 3,
-      start: "11:30 AM",
-      end: "12:30 PM",
-      type: "lab",
-      sets: {
-        A: { subject: "Programming in JAVA Lab (BCA-C262)", faculty: "Anup Shekhar Chamoli" },
-        B: { subject: "Linux Lab (BCA-C261)", faculty: "Neha Bhatt" }
-      }
-    },
-    {
-      period: 5,
-      start: "01:30 PM",
-      end: "02:30 PM",
-      type: "theory",
-      subject: "Personality Development (PD)",
-      faculty: "Deepak Kumar"
-    },
-    {
-      period: 7,
-      start: "03:30 PM",
-      end: "04:30 PM",
-      type: "theory",
-      subject: "Computer Networks (BCA-C252)",
-      faculty: "Upasana Rana"
-    }
+    { period: 1, start: "09:30 AM", end: "10:30 AM", type: "lab", sets: { A: { subject: "Linux Lab", faculty: "Neha Bhatt" }, B: { subject: "JAVA Lab", faculty: "Anup Shekhar Chamoli" } } },
+    { period: 2, start: "10:30 AM", end: "11:30 AM", type: "lab", sets: { A: { subject: "Linux Lab", faculty: "Neha Bhatt" }, B: { subject: "JAVA Lab", faculty: "Anup Shekhar Chamoli" } } },
+    { period: 3, start: "11:30 AM", end: "12:30 PM", type: "lab", sets: { A: { subject: "JAVA Lab", faculty: "Anup Shekhar Chamoli" }, B: { subject: "Linux Lab", faculty: "Neha Bhatt" } } },
+    { period: 4, start: "01:30 PM", end: "02:30 PM", type: "lab", sets: { A: { subject: "JAVA Lab", faculty: "Anup Shekhar Chamoli" }, B: { subject: "Linux Lab", faculty: "Neha Bhatt" } } },
+    { period: 5, start: "02:30 PM", end: "03:30 PM", type: "theory", subject: "Personality Development", faculty: "Deepak Kumar" },
+    { period: 6, start: "03:30 PM", end: "04:30 PM", type: "theory", subject: "Computer Networks", faculty: "Upasana Rana" }
   ],
-
   Tuesday: [
-    {
-      period: 1,
-      start: "09:30 AM",
-      end: "10:30 AM",
-      type: "theory",
-      subject: "Programming in JAVA (BCA-C254)",
-      faculty: "Anup Shekhar Chamoli"
-    },
-    {
-      period: 2,
-      start: "10:30 AM",
-      end: "11:30 AM",
-      type: "theory",
-      subject: "Operation System and Linux (BCA-C251)",
-      faculty: "Neha Bhatt"
-    },
-    {
-      period: 3,
-      start: "11:30 AM",
-      end: "12:30 PM",
-      type: "theory",
-      subject: "Fundamental of IOT (BCA-253 G1)",
-      faculty: "Divya Pandey"
-    },
-    {
-      period: 5,
-      start: "01:30 PM",
-      end: "02:30 PM",
-      type: "theory",
-      subject: "Fundamental of IOT (BCA-253 G1)",
-      faculty: "Divya Pandey"
-    },
-    {
-      period: 6,
-      start: "02:30 PM",
-      end: "03:30 PM",
-      type: "project",
-      sets: {
-        A: { subject: "Mini Project-IV (BCA-5263)", faculty: "Anup Shekhar Chamoli" },
-        B: { subject: "Mini Project-IV (BCA-5263)", faculty: "Deepak Kumar Pathak" }
-      }
-    },
-    {
-      period: 7,
-      start: "03:30 PM",
-      end: "04:30 PM",
-      type: "theory",
-      subject: "Programming Skills",
-      faculty: "Amarjeet Rawat"
-    }
+    { period: 1, start: "09:30 AM", end: "10:30 AM", type: "theory", subject: "Programming in JAVA", faculty: "Anup Shekhar Chamoli" },
+    { period: 2, start: "10:30 AM", end: "11:30 AM", type: "theory", subject: "Operating System and Linux", faculty: "Neha Bhatt" },
+    { period: 3, start: "11:30 AM", end: "12:30 PM", type: "theory", subject: "Fundamental of IOT", faculty: "Divya Pandey" },
+    { period: 4, start: "01:30 PM", end: "02:30 PM", type: "theory", subject: "Fundamental of IOT", faculty: "Divya Pandey" },
+    { period: 5, start: "02:30 PM", end: "03:30 PM", type: "project", sets: { A: { subject: "Mini Project-IV", faculty: "Anup Shekhar Chamoli" }, B: { subject: "Mini Project-IV", faculty: "Deepak Kumar Pathak" } } },
+    { period: 6, start: "03:30 PM", end: "04:30 PM", type: "theory", subject: "Aptitude/Skills", faculty: "Amarjeet Rawat" }
   ],
-
   Wednesday: [
-    {
-      period: 1,
-      start: "09:30 AM",
-      end: "10:30 AM",
-      type: "theory",
-      subject: "Personality Development (PD)",
-      faculty: "Deepak Kumar"
-    },
-    {
-      period: 2,
-      start: "10:30 AM",
-      end: "11:30 AM",
-      type: "theory",
-      subject: "Operation System and Linux (BCA-C251)",
-      faculty: "Neha Bhatt"
-    },
-    {
-      period: 3,
-      start: "11:30 AM",
-      end: "12:30 PM",
-      type: "theory",
-      subject: "Computer Networks (BCA-C252)",
-      faculty: "Upasana Rana"
-    },
-    {
-      period: 5,
-      start: "01:30 PM",
-      end: "02:30 PM",
-      type: "theory",
-      subject: "Programming in JAVA (BCA-C254)",
-      faculty: "Anup Shekhar Chamoli"
-    },
-    {
-      period: 6,
-      start: "02:30 PM",
-      end: "03:30 PM",
-      type: "theory",
-      subject: "Soft Skills",
-      faculty: "Sohrab Ali"
-    },
-    {
-      period: 7,
-      start: "03:30 PM",
-      end: "04:30 PM",
-      type: "theory",
-      subject: "Computer Networks (BCA-C252)",
-      faculty: "Upasana Rana"
-    }
+    { period: 1, start: "09:30 AM", end: "10:30 AM", type: "theory", subject: "Personality Development", faculty: "Deepak Kumar" },
+    { period: 2, start: "10:30 AM", end: "11:30 AM", type: "theory", subject: "Operating System and Linux", faculty: "Neha Bhatt" },
+    { period: 3, start: "11:30 AM", end: "12:30 PM", type: "theory", subject: "Computer Networks", faculty: "Upasana Rana" },
+    { period: 4, start: "01:30 PM", end: "02:30 PM", type: "theory", subject: "Programming in JAVA", faculty: "Anup Shekhar Chamoli" },
+    { period: 5, start: "02:30 PM", end: "03:30 PM", type: "theory", subject: "Programming Skills", faculty: "Sohrab Ali" },
+    { period: 6, start: "03:30 PM", end: "04:30 PM", type: "theory", subject: "Computer Networks", faculty: "Upasana Rana" }
   ],
-
   Thursday: [
-    {
-      period: 1,
-      start: "09:30 AM",
-      end: "10:30 AM",
-      type: "theory",
-      subject: "Professional Development",
-      faculty: "Deepak Kumar Pathak"
-    },
-    {
-      period: 2,
-      start: "10:30 AM",
-      end: "11:30 AM",
-      type: "theory",
-      subject: "Operation System and Linux (BCA-C251)",
-      faculty: "Neha Bhatt"
-    },
-    {
-      period: 3,
-      start: "11:30 AM",
-      end: "12:30 PM",
-      type: "theory",
-      subject: "Programming in JAVA (BCA-C254)",
-      faculty: "Anup Shekhar Chamoli"
-    },
-    {
-      period: 5,
-      start: "01:30 PM",
-      end: "02:30 PM",
-      type: "project",
-      sets: {
-        A: { subject: "Mini Project-IV (BCA-5263)", faculty: "Anup Shekhar Chamoli" },
-        B: { subject: "Mini Project-IV (BCA-5263)", faculty: "Deepak Kumar Pathak" }
-      }
-    },
-    {
-      period: 6,
-      start: "02:30 PM",
-      end: "03:30 PM",
-      type: "theory",
-      subject: "Fundamental of IOT (BCA-253 G1)",
-      faculty: "Divya Pandey"
-    },
-    {
-      period: 7,
-      start: "03:30 PM",
-      end: "04:30 PM",
-      type: "theory",
-      subject: "Operation System and Linux (BCA-C251)",
-      faculty: "Neha Bhatt"
-    }
+    { period: 1, start: "09:30 AM", end: "10:30 AM", type: "theory", subject: "Personality Development", faculty: "Deepak Kumar" },
+    { period: 2, start: "10:30 AM", end: "11:30 AM", type: "theory", subject: "Operating System and Linux", faculty: "Neha Bhatt" },
+    { period: 3, start: "11:30 AM", end: "12:30 PM", type: "theory", subject: "Programming in JAVA", faculty: "Anup Shekhar Chamoli" },
+    { period: 4, start: "01:30 PM", end: "02:30 PM", type: "project", sets: { A: { subject: "Mini Project-IV", faculty: "Anup Shekhar Chamoli" }, B: { subject: "Mini Project-IV", faculty: "Deepak Kumar Pathak" } } },
+    { period: 5, start: "02:30 PM", end: "03:30 PM", type: "theory", subject: "Fundamental of IOT", faculty: "Divya Pandey" },
+    { period: 6, start: "03:30 PM", end: "04:30 PM", type: "theory", subject: "Operating System and Linux", faculty: "Neha Bhatt" }
   ],
-
   Friday: [
-    {
-      period: 1,
-      start: "09:30 AM",
-      end: "10:30 AM",
-      type: "theory",
-      subject: "Computer Networks (BCA-C252)",
-      faculty: "Upasana Rana"
-    },
-    {
-      period: 2,
-      start: "10:30 AM",
-      end: "11:30 AM",
-      type: "theory",
-      subject: "Personality Development (PD)",
-      faculty: "Deepak Kumar"
-    },
-    {
-      period: 3,
-      start: "11:30 AM",
-      end: "12:30 PM",
-      type: "theory",
-      subject: "Computer Networks (BCA-C252)",
-      faculty: "Upasana Rana"
-    },
-    {
-      period: 5,
-      start: "01:30 PM",
-      end: "02:30 PM",
-      type: "theory",
-      subject: "Fundamental of IOT (BCA-253 G1)",
-      faculty: "Divya Pandey"
-    }
+    { period: 1, start: "09:30 AM", end: "10:30 AM", type: "theory", subject: "Computer Networks", faculty: "Upasana Rana" },
+    { period: 2, start: "10:30 AM", end: "11:30 AM", type: "theory", subject: "Personality Development", faculty: "Deepak Kumar" },
+    { period: 3, start: "11:30 AM", end: "12:30 PM", type: "theory", subject: "Computer Networks", faculty: "Upasana Rana" },
+    { period: 4, start: "01:30 PM", end: "02:30 PM", type: "theory", subject: "Fundamental of IOT", faculty: "Divya Pandey" },
+    { period: 5, start: "02:30 PM", end: "03:30 PM", type: "theory", subject: "Programming in JAVA", faculty: "Anup Shekhar Chamoli" }
   ],
-
-  Saturday: [],
-  Sunday: []
+  Saturday: [], Sunday: []
 };
 
 
